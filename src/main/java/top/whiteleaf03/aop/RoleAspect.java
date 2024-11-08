@@ -18,17 +18,17 @@ import top.whiteleaf03.utils.Result;
 @Slf4j
 @Aspect
 @Component
-public class TokenAspect {
-    @Pointcut("@annotation(top.whiteleaf03.aop.TokenCheck)")
-    public void tokenRequiredMethods() {
+public class RoleAspect {
+    @Pointcut("@annotation(top.whiteleaf03.aop.RoleCheck)")
+    public void roleRequiredMethods() {
     }
 
-    @Around("tokenRequiredMethods() && @annotation(tokenCheck)")
-    public Object checkToken(ProceedingJoinPoint joinPoint, TokenCheck tokenCheck) throws Throwable {
+    @Around("roleRequiredMethods() && @annotation(roleCheck)")
+    public Object checkToken(ProceedingJoinPoint joinPoint, RoleCheck roleCheck) throws Throwable {
         User user = (User) RequestContextHolder.getRequestAttributes().getAttribute("UserInfo", RequestAttributes.SCOPE_REQUEST);
 
         //鉴权
-        if (ArrayUtil.isNotEmpty(tokenCheck.value()) && !ArrayUtil.contains(tokenCheck.value(), user.getRole())) {
+        if (ArrayUtil.isNotEmpty(roleCheck.value()) && !ArrayUtil.contains(roleCheck.value(), user.getRole())) {
             return Result.authFailed("无权限访问");
         }
 
