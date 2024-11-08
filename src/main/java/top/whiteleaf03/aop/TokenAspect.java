@@ -6,12 +6,10 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import top.whiteleaf03.modal.entity.User;
-import top.whiteleaf03.utils.RedisUtil;
 import top.whiteleaf03.utils.Result;
 
 /**
@@ -21,13 +19,6 @@ import top.whiteleaf03.utils.Result;
 @Aspect
 @Component
 public class TokenAspect {
-    private final RedisUtil redisUtil;
-
-    @Autowired
-    public TokenAspect(RedisUtil redisUtil) {
-        this.redisUtil = redisUtil;
-    }
-
     @Pointcut("@annotation(top.whiteleaf03.aop.TokenCheck)")
     public void tokenRequiredMethods() {
     }
