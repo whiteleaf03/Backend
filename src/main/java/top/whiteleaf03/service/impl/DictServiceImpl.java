@@ -41,7 +41,7 @@ public class DictServiceImpl implements DictService {
         if (StrUtil.isNotBlank(description)) {
             qw.like("name", "%" + description + "%");
         }
-        Page<DictInfo> page = dictInfoMapper.selectPage(new Page<>(pageParams.getPage(), pageParams.getSize()), qw);
+        Page<DictInfo> page = dictInfoMapper.selectPage(pageParams.toPage(), qw);
         return PageResult.success(page.getTotal(), page.getRecords());
     }
 

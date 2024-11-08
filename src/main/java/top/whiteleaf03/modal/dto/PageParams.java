@@ -31,7 +31,7 @@ public class PageParams {
         throw new RuntimeException("分页参数错误");
     }
 
-    public IPage<T> toPage() {
+    public Page toPage() {
         if (page != null && page > -1 && size != null && size > 0) {
             return new Page<>(page, size);
         }

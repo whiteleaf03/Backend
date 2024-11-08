@@ -21,6 +21,7 @@ public class DictController {
 
     @GetMapping("list")
     public Result getDictInfoList(PageParams pageParams, String name, String key, String description) {
+        pageParams.check();
         return dictService.getDictInfoList(pageParams, name, key, description);
     }
 
