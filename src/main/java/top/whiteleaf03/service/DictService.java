@@ -11,7 +11,7 @@ import java.util.List;
  * @author WhiteLeaf03
  */
 public interface DictService {
-    Result getDictInfoList(PageParams pageParams, String name, String key, String describe);
+    Result getDictInfoList(PageParams pageParams, String name, String key, String description);
 
     List<DictData> getDictDataByDictInfoId(Long id);
 

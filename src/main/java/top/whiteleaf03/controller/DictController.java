@@ -20,8 +20,8 @@ public class DictController {
     private DictService dictService;
 
     @GetMapping("list")
-    public Result getDictInfoList(PageParams pageParams, String name, String key, String describe) {
-        return dictService.getDictInfoList(pageParams, name, key, describe);
+    public Result getDictInfoList(PageParams pageParams, String name, String key, String description) {
+        return dictService.getDictInfoList(pageParams, name, key, description);
     }
 
     @GetMapping("")

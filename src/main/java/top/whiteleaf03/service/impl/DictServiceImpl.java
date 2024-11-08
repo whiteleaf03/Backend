@@ -1,5 +1,6 @@
 package top.whiteleaf03.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,17 @@ public class DictServiceImpl implements DictService {
     private DictDataMapper dictDataMapper;
 
     @Override
-    public PageResult getDictInfoList(PageParams pageParams, String name, String key, String describe) {
+    public PageResult getDictInfoList(PageParams pageParams, String name, String key, String description) {
+        QueryWrapper<DictInfo> qw = new QueryWrapper<>();
+        if (StrUtil.isNotBlank(name)) {
+            qw.like("name", "%" + name + "%");
+        }
+        if (StrUtil.isNotBlank(key)) {
+            qw.like("name", "%" + key + "%");
+        }
+        if (StrUtil.isNotBlank(description)) {
+            qw.like("name", "%" + description + "%");
+        }
         Page<DictInfo> page = dictInfoMapper.selectPage(new Page<>(pageParams.getPage(), pageParams.getSize()), null);
         return PageResult.success(page.getTotal(), page.getRecords());
     }
