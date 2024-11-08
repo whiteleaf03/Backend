@@ -1,6 +1,7 @@
 package top.whiteleaf03.service.impl;
 
 import cn.hutool.crypto.digest.DigestUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result login(String username, String password) {
-        User user = userMapper.findUserByUsername(username);
+        QueryWrapper<User> qw = new QueryWrapper<>();
+        qw.eq("username", username);
+        User user = userMapper.selectOne(qw);
+        if (user == null) {
+            return Result.error("用户不存在，请检查用户名或密码是否正确");
+        }
         if (DigestUtil.bcryptCheck(password, user.getPassword())) {
             String token = TokenUtils.createToken(user.getId());
             Map<String, Object> map = new HashMap() {{

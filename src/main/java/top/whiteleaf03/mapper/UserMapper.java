@@ -10,6 +10,4 @@ import top.whiteleaf03.modal.entity.User;
  */
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
-    @Select("select u.username as username, u.password as password, r.`level` as role, u.nickname as nickname from `user` u join `role` r on u.`role_id` = r.id;")
-    User findUserByUsername(String username);
 }
