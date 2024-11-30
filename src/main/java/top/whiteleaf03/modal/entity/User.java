@@ -1,35 +1,42 @@
 package top.whiteleaf03.modal.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableField;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.Date;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * @author WhiteLeaf03
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class User {
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
-    @TableField(fill = FieldFill.INSERT, value = "create_time")
-    private Date createTime;
-
-    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_time")
-    private Date updateTime;
-
-    @TableLogic(value = "0", delval = "1")
-    private Boolean isDelete = false;
-
+@AllArgsConstructor
+@NoArgsConstructor
+public class User extends BaseEntity {
+    /**
+     * 用户名
+     */
     private String username;
 
+    /**
+     * 密码
+     */
     private String password;
 
+    /**
+     * 昵称
+     */
     private String nickname;
 
+    /**
+     * 角色id
+     */
     private Long roleId;
 
+    /**
+     * 对应角色
+     */
     @TableField(exist=false, select=false)
     private Role role;
 
