@@ -35,58 +35,58 @@ public class WebAuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
         log.info("请求访问接口: {}", uri);
+
+        // 登录请求 放行
         if (WHITE_LIST_URLS.contains(uri)) {
-            // 登录请求 放行
             return true;
-        } else if (uri.endsWith("/export")) {
-            // 导出请求 放行
-            return true;
-        } else {
-            String token = request.getHeader("Authorization");
-            //token判空
-            if (StrUtil.isBlank(token)) {
-                String responseJson = JSONUtil.toJsonStr(Result.authFailed("token为空"));
-                setResponseMsg(response, responseJson);
-                return false;
-            }
-
-            //获取id
-            String id;
-            try {
-                id = TokenUtils.parseToken(token);
-            } catch (RuntimeException e) {
-                String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token非法"));
-                setResponseMsg(response, jsonStr);
-                return false;
-            }
-
-            //判断是否过期
-            Map<String, String> tokenMap = RedisUtil.getCacheObject("[OnlineUserToken]id:" + id);
-            if (tokenMap == null) {
-                String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token已过期"));
-                setResponseMsg(response, jsonStr);
-                return false;
-            }
-
-            String validToken = tokenMap.get("token");
-            if (StrUtil.isBlank(validToken) || !validToken.equals(token)) {
-                String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token已过期"));
-                setResponseMsg(response, jsonStr);
-                return false;
-            }
-
-            //判断用户是否存在
-            JSONObject userJson = RedisUtil.getCacheObject("[OnlineUserInfo]id:" + id);
-            User user = JSONUtil.toBean(userJson, User.class);
-            if (ObjectUtil.isNull(user)) {
-                String jsonStr = JSONUtil.toJsonStr(Result.authFailed("用户不存在"));
-                setResponseMsg(response, jsonStr);
-                return false;
-            }
-
-            //检验通过 将用户信息存入上下文
-            RequestContextHolder.getRequestAttributes().setAttribute("UserInfo", user, RequestAttributes.SCOPE_REQUEST);
         }
+
+        // 导出从请求参数获取token 其余从请求头获取token
+        String token = uri.endsWith("/export") ? request.getParameter("token") : request.getHeader("Authorization");
+
+        //token判空
+        if (StrUtil.isBlank(token)) {
+            String responseJson = JSONUtil.toJsonStr(Result.authFailed("token为空"));
+            setResponseMsg(response, responseJson);
+            return false;
+        }
+
+        //获取id
+        String id;
+        try {
+            id = TokenUtils.parseToken(token);
+        } catch (RuntimeException e) {
+            String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token非法"));
+            setResponseMsg(response, jsonStr);
+            return false;
+        }
+
+        //判断是否过期
+        Map<String, String> tokenMap = RedisUtil.getCacheObject("[OnlineUserToken]id:" + id);
+        if (tokenMap == null) {
+            String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token已过期"));
+            setResponseMsg(response, jsonStr);
+            return false;
+        }
+
+        String validToken = tokenMap.get("token");
+        if (StrUtil.isBlank(validToken) || !validToken.equals(token)) {
+            String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token已过期"));
+            setResponseMsg(response, jsonStr);
+            return false;
+        }
+
+        //判断用户是否存在
+        JSONObject userJson = RedisUtil.getCacheObject("[OnlineUserInfo]id:" + id);
+        User user = JSONUtil.toBean(userJson, User.class);
+        if (ObjectUtil.isNull(user)) {
+            String jsonStr = JSONUtil.toJsonStr(Result.authFailed("用户不存在"));
+            setResponseMsg(response, jsonStr);
+            return false;
+        }
+
+        //检验通过 将用户信息存入上下文
+        RequestContextHolder.getRequestAttributes().setAttribute("UserInfo", user, RequestAttributes.SCOPE_REQUEST);
         return true;
     }
 
