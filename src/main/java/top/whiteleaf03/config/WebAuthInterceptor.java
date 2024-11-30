@@ -62,6 +62,12 @@ public class WebAuthInterceptor implements HandlerInterceptor {
 
             //判断是否过期
             Map<String, String> tokenMap = RedisUtil.getCacheObject("[OnlineUserToken]id:" + id);
+            if (tokenMap == null) {
+                String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token已过期"));
+                setResponseMsg(response, jsonStr);
+                return false;
+            }
+
             String validToken = tokenMap.get("token");
             if (StrUtil.isBlank(validToken) || !validToken.equals(token)) {
                 String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token已过期"));
