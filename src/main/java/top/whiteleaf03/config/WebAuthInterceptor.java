@@ -2,6 +2,7 @@ package top.whiteleaf03.config;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,10 +14,14 @@ import top.whiteleaf03.utils.RedisUtil;
 import top.whiteleaf03.utils.Result;
 import top.whiteleaf03.utils.TokenUtils;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author WhiteLeaf03
@@ -24,15 +29,20 @@ import java.io.PrintWriter;
 @Component
 @Slf4j
 public class WebAuthInterceptor implements HandlerInterceptor {
+    private final List<String> WHITE_LIST_URLS = Arrays.asList("/api/user/login", "/api/user/register", "/api/user/captcha");
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
-        log.info("请求访问接口: {}", request.getRequestURI());
-        if ("/api/login".equals(uri)) {
+        log.info("请求访问接口: {}", uri);
+        if (WHITE_LIST_URLS.contains(uri)) {
             // 登录请求 放行
             return true;
+        } else if (uri.endsWith("/export")) {
+            // 导出请求 放行
+            return true;
         } else {
-            String token = request.getHeader("token");
+            String token = request.getHeader("Authorization");
             //token判空
             if (StrUtil.isBlank(token)) {
                 String responseJson = JSONUtil.toJsonStr(Result.authFailed("token为空"));
@@ -51,7 +61,8 @@ public class WebAuthInterceptor implements HandlerInterceptor {
             }
 
             //判断是否过期
-            String validToken = RedisUtil.getCacheObject("[OnlineUserToken]" + id);
+            Map<String, String> tokenMap = RedisUtil.getCacheObject("[OnlineUserToken]id:" + id);
+            String validToken = tokenMap.get("token");
             if (StrUtil.isBlank(validToken) || !validToken.equals(token)) {
                 String jsonStr = JSONUtil.toJsonStr(Result.authFailed("token已过期"));
                 setResponseMsg(response, jsonStr);
@@ -59,7 +70,8 @@ public class WebAuthInterceptor implements HandlerInterceptor {
             }
 
             //判断用户是否存在
-            User user = RedisUtil.getCacheObject("[OnlineUserInfo]" + id);
+            JSONObject userJson = RedisUtil.getCacheObject("[OnlineUserInfo]id:" + id);
+            User user = JSONUtil.toBean(userJson, User.class);
             if (ObjectUtil.isNull(user)) {
                 String jsonStr = JSONUtil.toJsonStr(Result.authFailed("用户不存在"));
                 setResponseMsg(response, jsonStr);
